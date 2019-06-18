@@ -8,12 +8,19 @@ use rettle::tea::Tea;
 use std::sync::{Arc, RwLock};
 use std::io::{BufReader};
 use std::fs::File;
+use std::any::Any;
 
-struct CsvArg {
-    filepath: String
+pub struct CsvArg {
+    pub filepath: String
 }
 
-pub fn fill_from_csv<T: Tea>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>, TeaStruct: T) {
+impl Argument for CsvArg {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
+pub fn fill_from_csv<T: Tea + Send>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>, TeaStruct: T) {
    match args {
        None => panic!("Need to pass \"filepath\" param!"),
        Some(box_args) => {
