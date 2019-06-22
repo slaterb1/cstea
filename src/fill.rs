@@ -23,7 +23,7 @@ impl Argument for CsvArg {
     }
 }
 
-pub fn fill_from_csv<T: Tea + Debug + Send + ?Sized>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>, tea_struct: Box<T>) 
+pub fn fill_from_csv<T: Tea + Send + Debug + ?Sized>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>) 
 where
     for<'de> T: Deserialize<'de>
 {

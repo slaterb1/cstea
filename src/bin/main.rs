@@ -37,8 +37,7 @@ fn main() {
         name: String::from("csv_tea_source"),
         source: String::from("csv_fixture"),
         computation: Box::new(|args, brewery, recipe| {
-            let sample_tea = CsTea::new(Box::new(CsTea::default()));
-            fill_from_csv(args, brewery, recipe, sample_tea);
+            fill_from_csv::<CsTea>(args, brewery, recipe);
         }),
         params: Some(Box::new(test_csvarg))
     }));
