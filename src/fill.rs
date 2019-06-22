@@ -27,8 +27,7 @@ pub struct FillCsTea {}
 
 impl FillCsTea {
     pub fn new<T: Tea + Send + Debug + ?Sized + 'static>(name: &str, source: &str, params: CsvArg) -> Box<Fill> 
-    where
-        for<'de> T: Deserialize<'de>
+        where for<'de> T: Deserialize<'de>
     {
         Box::new(Fill {
             name: String::from(name),
@@ -42,8 +41,7 @@ impl FillCsTea {
 }
 
 fn fill_from_csv<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>) 
-where
-    for<'de> T: Deserialize<'de>
+    where for<'de> T: Deserialize<'de>
 {
     match args {
         None => panic!("Need to pass \"filepath\" param!"),
