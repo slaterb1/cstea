@@ -3,7 +3,7 @@ extern crate csv;
 extern crate serde;
 
 use rettle::ingredient::{Ingredient, Argument};
-use rettle::brewer::{Brewery};
+use rettle::brewer::{Brewery, make_tea};
 use rettle::tea::Tea;
 
 use std::sync::{Arc, RwLock};
@@ -23,7 +23,7 @@ impl Argument for CsvArg {
     }
 }
 
-pub fn fill_from_csv<T: Tea + Send + Debug + ?Sized>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>) 
+pub fn fill_from_csv<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>) 
 where
     for<'de> T: Deserialize<'de>
 {
@@ -35,12 +35,15 @@ where
             let reader = BufReader::new(f);
             let mut rdr = csv::Reader::from_reader(reader);
             
-            //let mut tea_box: Vec<T> = vec![];
+            let mut tea_batch: Vec<Box<dyn Tea + Send>> = vec![];
             for result in rdr.deserialize() {
-                let record: T = result.unwrap();
-                println!("{:?}", record);
-                //tea_box.push(record);
+                let tea: T = result.unwrap();
+                tea_batch.push(Box::new(tea));
             }
+            let recipe = Arc::clone(&recipe);
+            brewery.take_order(|| {
+                make_tea(tea_batch, recipe);
+            });
         }
     }
 }

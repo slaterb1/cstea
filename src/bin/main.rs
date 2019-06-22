@@ -6,13 +6,13 @@ use cstea::fill::{CsvArg, fill_from_csv};
 use rettle::tea::Tea;
 use rettle::brewer::Brewery;
 use rettle::pot::Pot;
-use rettle::ingredient::Fill;
+use rettle::ingredient::{Fill, Pour};
 
 use std::any::Any;
 use std::time::Instant;
 use serde::Deserialize;
 
-#[derive(Default, Debug, Deserialize)]
+#[derive(Default, Clone, Debug, Deserialize)]
 struct CsTea {
     id: i32,
     name: String,
@@ -40,6 +40,21 @@ fn main() {
             fill_from_csv::<CsTea>(args, brewery, recipe);
         }),
         params: Some(Box::new(test_csvarg))
+    }));
+
+    new_pot.add_ingredient(Box::new(Pour{
+        name: String::from("pour1"),
+        computation: Box::new(|tea_batch, _args| {
+            tea_batch.into_iter()
+                .map(|tea| {
+                    println!("Final Tea: {:?}", tea.as_any().downcast_ref::<CsTea>().unwrap());
+                    let tea = tea.as_any().downcast_ref::<CsTea>().unwrap();
+                    let same_tea = tea.clone();
+                    Box::new(same_tea) as Box<dyn Tea + Send>
+                })
+                .collect()
+        }),
+        params: None,
     }));
 
     new_pot.brew(&brewery);
