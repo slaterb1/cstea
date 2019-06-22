@@ -2,11 +2,11 @@ extern crate cstea;
 extern crate rettle;
 extern crate serde;
 
-use cstea::fill::{CsvArg, fill_from_csv};
+use cstea::fill::{CsvArg, FillCsTea};
 use rettle::tea::Tea;
 use rettle::brewer::Brewery;
 use rettle::pot::Pot;
-use rettle::ingredient::{Fill, Pour};
+use rettle::ingredient::Pour;
 
 use std::any::Any;
 use std::time::Instant;
@@ -32,15 +32,9 @@ fn main() {
     let test_csvarg = CsvArg { filepath: String::from("fixtures/test.csv") };
     let brewery = Brewery::new(4, Instant::now());
     let mut new_pot = Pot::new();
+    let fill_cstea = FillCsTea::new::<CsTea>("csv_tea_source", "csv_fixture", test_csvarg);
 
-    new_pot.add_source(Box::new(Fill{
-        name: String::from("csv_tea_source"),
-        source: String::from("csv_fixture"),
-        computation: Box::new(|args, brewery, recipe| {
-            fill_from_csv::<CsTea>(args, brewery, recipe);
-        }),
-        params: Some(Box::new(test_csvarg))
-    }));
+    new_pot.add_source(fill_cstea);
 
     new_pot.add_ingredient(Box::new(Pour{
         name: String::from("pour1"),

@@ -2,7 +2,7 @@ extern crate rettle;
 extern crate csv;
 extern crate serde;
 
-use rettle::ingredient::{Ingredient, Argument};
+use rettle::ingredient::{Ingredient, Argument, Fill};
 use rettle::brewer::{Brewery, make_tea};
 use rettle::tea::Tea;
 
@@ -23,7 +23,25 @@ impl Argument for CsvArg {
     }
 }
 
-pub fn fill_from_csv<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>) 
+pub struct FillCsTea {}
+
+impl FillCsTea {
+    pub fn new<T: Tea + Send + Debug + ?Sized + 'static>(name: &str, source: &str, params: CsvArg) -> Box<Fill> 
+    where
+        for<'de> T: Deserialize<'de>
+    {
+        Box::new(Fill {
+            name: String::from(name),
+            source: String::from(source),
+            computation: Box::new(|args, brewery, recipe| {
+                fill_from_csv::<T>(args, brewery, recipe);
+            }),
+            params: Some(Box::new(params))
+        })
+    }
+}
+
+fn fill_from_csv<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>) 
 where
     for<'de> T: Deserialize<'de>
 {
