@@ -13,7 +13,10 @@ use std::any::Any;
 use serde::Deserialize;
 use std::fmt::Debug;
 
+///
+/// Data structure that holds the Ingredient params for FillCsTea.
 pub struct CsvArg {
+    /// The filepath to the csv that will be processed.
     pub filepath: String
 }
 
@@ -23,9 +26,19 @@ impl Argument for CsvArg {
     }
 }
 
+///
+/// Wrapper to simplifiy the creation of the Fill Ingredient to be used in the rettle Pot.
 pub struct FillCsTea {}
 
 impl FillCsTea {
+    ///
+    /// Returns the Fill Ingredient to be added to the `rettle` Pot.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - Ingredient name
+    /// * `source` - Ingredient source
+    /// * `params` - Params data structure holding the `filepath` for the csv to process
     pub fn new<T: Tea + Send + Debug + ?Sized + 'static>(name: &str, source: &str, params: CsvArg) -> Box<Fill> 
         where for<'de> T: Deserialize<'de>
     {
@@ -40,6 +53,15 @@ impl FillCsTea {
     }
 }
 
+///
+/// Implements the csv read, deserialization to specified data struct, and passes the data to the
+/// brewery for processing.
+///
+/// # Arguments
+///
+/// * `args` - Params specifying the filepath of the csv.
+/// * `brewery` - Brewery that processes the data.
+/// * `recipe` - Recipe for the ETL used by the Brewery.
 fn fill_from_csv<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>) 
     where for<'de> T: Deserialize<'de>
 {
