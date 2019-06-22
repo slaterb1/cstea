@@ -1,5 +1,6 @@
 extern crate cstea;
 extern crate rettle;
+extern crate serde;
 
 use cstea::fill::{CsvArg, fill_from_csv};
 use rettle::tea::Tea;
@@ -9,8 +10,9 @@ use rettle::ingredient::Fill;
 
 use std::any::Any;
 use std::time::Instant;
+use serde::Deserialize;
 
-#[derive(Default)]
+#[derive(Default, Send,  Debug, Deserialize)]
 struct CsTea {
     id: i32,
     name: String,
