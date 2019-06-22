@@ -29,7 +29,7 @@ impl Tea for CsTea {
 }
 
 fn main() {
-    let test_csvarg = CsvArg { filepath: String::from("fixtures/test.csv") };
+    let test_csvarg = CsvArg::new("fixtures/test.csv", 50);
     let brewery = Brewery::new(4, Instant::now());
     let mut new_pot = Pot::new();
     let fill_cstea = FillCsTea::new::<CsTea>("csv_tea_source", "csv_fixture", test_csvarg);
