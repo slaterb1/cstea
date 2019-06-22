@@ -12,7 +12,7 @@ use std::any::Any;
 use std::time::Instant;
 use serde::Deserialize;
 
-#[derive(Default, Send,  Debug, Deserialize)]
+#[derive(Default, Debug, Deserialize)]
 struct CsTea {
     id: i32,
     name: String,

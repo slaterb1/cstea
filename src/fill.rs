@@ -23,7 +23,10 @@ impl Argument for CsvArg {
     }
 }
 
-pub fn fill_from_csv<'a, T: Tea + Deserialize<'a> + Debug + Send + ?Sized>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>, tea_struct: Box<T>) {
+pub fn fill_from_csv<T: Tea + Debug + Send + ?Sized>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>, tea_struct: Box<T>) 
+where
+    for<'de> T: Deserialize<'de>
+{
     match args {
         None => panic!("Need to pass \"filepath\" param!"),
         Some(box_args) => {
