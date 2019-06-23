@@ -22,6 +22,13 @@ pub struct CsvArg {
 }
 
 impl CsvArg {
+    ///
+    /// Returns a CsvArg to be used as params in FillCsTea.
+    ///
+    /// # Arguments
+    ///
+    /// * `filepath` - filepath for csv to load.
+    /// * `buffer_length` - number of csv lines to process at a time.
     pub fn new(filepath: &str, buffer_length: usize) -> CsvArg {
         let filepath = String::from(filepath);
         CsvArg { filepath, buffer_length }
@@ -112,5 +119,47 @@ fn fill_from_csv<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn
             let recipe = Arc::clone(&recipe);
             call_brewery(brewery, recipe, tea_batch);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{CsvArg, FillCsTea};
+    use rettle::tea::Tea;
+    use rettle::pot::Pot;
+    use serde::Deserialize;
+    use std::any::Any;
+
+    #[derive(Default, Clone, Debug, Deserialize)]
+    struct TestCsTea {
+        id: i32,
+        name: String,
+        value: i32
+    }
+
+    impl Tea for TestCsTea {
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+        fn new(self: Box<Self>) -> Box<dyn Tea + Send> {
+            self
+        }
+    }
+
+    #[test]
+    fn create_csv_args() {
+        let csv_args = CsvArg::new("fixtures/test.csv", 50);
+        assert_eq!(csv_args.filepath, "fixtures/test.csv");
+        assert_eq!(csv_args.buffer_length, 50);
+    }
+
+    #[test]
+    fn create_fill_cstea() {
+        let csv_args = CsvArg::new("fixtures/test.csv", 50);
+        let fill_cstea = FillCsTea::new::<TestCsTea>("test_csv", "fixture", csv_args);
+        let mut new_pot = Pot::new();
+        new_pot.add_source(fill_cstea);
+        assert_eq!(new_pot.get_sources().len(), 1);
+        assert_eq!(new_pot.get_sources()[0].get_name(), "test_csv");
     }
 }
