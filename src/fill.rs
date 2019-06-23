@@ -14,14 +14,14 @@ use serde::Deserialize;
 use std::fmt::Debug;
 
 ///
-/// Data structure that holds the Ingredient params for FillCsTea.
-pub struct CsvArg {
+/// Ingredient params for FillCsTea.
+pub struct FillCsvArg {
     /// The filepath to the csv that will be processed.
     filepath: String,
     buffer_length: usize,
 }
 
-impl CsvArg {
+impl FillCsvArg {
     ///
     /// Returns a CsvArg to be used as params in FillCsTea.
     ///
@@ -29,13 +29,13 @@ impl CsvArg {
     ///
     /// * `filepath` - filepath for csv to load.
     /// * `buffer_length` - number of csv lines to process at a time.
-    pub fn new(filepath: &str, buffer_length: usize) -> CsvArg {
+    pub fn new(filepath: &str, buffer_length: usize) -> FillCsvArg {
         let filepath = String::from(filepath);
-        CsvArg { filepath, buffer_length }
+        FillCsvArg { filepath, buffer_length }
     }
 }
 
-impl Argument for CsvArg {
+impl Argument for FillCsvArg {
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -54,7 +54,7 @@ impl FillCsTea {
     /// * `name` - Ingredient name
     /// * `source` - Ingredient source
     /// * `params` - Params data structure holding the `filepath` for the csv to process
-    pub fn new<T: Tea + Send + Debug + ?Sized + 'static>(name: &str, source: &str, params: CsvArg) -> Box<Fill> 
+    pub fn new<T: Tea + Send + Debug + ?Sized + 'static>(name: &str, source: &str, params: FillCsvArg) -> Box<Fill> 
         where for<'de> T: Deserialize<'de>
     {
         Box::new(Fill {
@@ -97,7 +97,7 @@ fn fill_from_csv<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn
         None => panic!("Need to pass \"filepath\" and buffer_length params!"),
         Some(box_args) => {
             // unwrap params
-            let box_args = box_args.as_any().downcast_ref::<CsvArg>().unwrap();
+            let box_args = box_args.as_any().downcast_ref::<FillCsvArg>().unwrap();
             
             // initialize reader with specified file from path
             let f = File::open(&box_args.filepath).unwrap();
@@ -124,7 +124,7 @@ fn fill_from_csv<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn
 
 #[cfg(test)]
 mod tests {
-    use super::{CsvArg, FillCsTea};
+    use super::{FillCsvArg, FillCsTea};
     use rettle::tea::Tea;
     use rettle::pot::Pot;
     use serde::Deserialize;
@@ -148,14 +148,14 @@ mod tests {
 
     #[test]
     fn create_csv_args() {
-        let csv_args = CsvArg::new("fixtures/test.csv", 50);
+        let csv_args = FillCsvArg::new("fixtures/test.csv", 50);
         assert_eq!(csv_args.filepath, "fixtures/test.csv");
         assert_eq!(csv_args.buffer_length, 50);
     }
 
     #[test]
     fn create_fill_cstea() {
-        let csv_args = CsvArg::new("fixtures/test.csv", 50);
+        let csv_args = FillCsvArg::new("fixtures/test.csv", 50);
         let fill_cstea = FillCsTea::new::<TestCsTea>("test_csv", "fixture", csv_args);
         let mut new_pot = Pot::new();
         new_pot.add_source(fill_cstea);
