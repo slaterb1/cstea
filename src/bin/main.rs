@@ -40,7 +40,7 @@ impl Argument for SteepArgs {
 }
 
 fn main() {
-    let test_fill_csvarg = FillCsvArg::new("fixtures/test.csv", 50);
+    let test_fill_csvarg = FillCsvArg::new("fixtures/fill.csv", 50);
     let test_pour_csvarg = PourCsvArg::new("fixtures/pour.csv");
     let steep_args = SteepArgs { increment: 10000 };
 
