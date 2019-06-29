@@ -23,7 +23,7 @@ pub struct FillCsvArg {
 
 impl FillCsvArg {
     ///
-    /// Returns a CsvArg to be used as params in FillCsTea.
+    /// Returns a FillCsvArg to be used as params in FillCsTea.
     ///
     /// # Arguments
     ///

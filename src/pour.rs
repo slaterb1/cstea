@@ -7,9 +7,11 @@ use rettle::tea::Tea;
 
 use std::any::Any;
 use serde::Serialize;
+use std::fs::OpenOptions;
+use std::path::Path;
 
 ///
-/// Ingredient params for FillCsTea.
+/// Ingredient params for PourCsTea.
 pub struct PourCsvArg {
     /// The filepath to the csv that will be processed.
     filepath: String,
@@ -17,12 +19,11 @@ pub struct PourCsvArg {
 
 impl PourCsvArg {
     ///
-    /// Returns a CsvArg to be used as params in FillCsTea.
+    /// Returns a PourCsvArg to be used as params in PourCsTea.
     ///
     /// # Arguments
     ///
     /// * `filepath` - filepath for csv to load.
-    /// * `buffer_length` - number of csv lines to process at a time.
     pub fn new(filepath: &str) -> PourCsvArg {
         let filepath = String::from(filepath);
         PourCsvArg { filepath }
@@ -36,17 +37,16 @@ impl Argument for PourCsvArg {
 }
 
 ///
-/// Wrapper to simplifiy the creation of the Fill Ingredient to be used in the rettle Pot.
+/// Wrapper to simplifiy the creation of the Pour Ingredient to be used in the rettle Pot.
 pub struct PourCsTea {}
 
 impl PourCsTea {
     ///
-    /// Returns the Fill Ingredient to be added to the `rettle` Pot.
+    /// Returns the Pour Ingredient to be added to the `rettle` Pot.
     ///
     /// # Arguments
     ///
     /// * `name` - Ingredient name
-    /// * `source` - Ingredient source
     /// * `params` - Params data structure holding the `filepath` for the csv to process
     pub fn new<T: Tea + Send + Sync + Clone + Serialize + 'static>(name: &str, params: PourCsvArg) -> Box<Pour> {
         Box::new(Pour {
@@ -60,14 +60,13 @@ impl PourCsTea {
 }
 
 ///
-/// Implements the csv read, deserialization to specified data struct, and passes the data to the
+/// Implements the csv pour, with serialization based on specified data struct.
 /// brewery for processing.
 ///
 /// # Arguments
 ///
+/// * `tea_batch` - Vec<Box<dyn Tea + Send>> batch that needs to be output to csv
 /// * `args` - Params specifying the filepath of the csv.
-/// * `brewery` - Brewery that processes the data.
-/// * `recipe` - Recipe for the ETL used by the Brewery.
 fn pour_to_csv<T: Tea + Send + Sync + Clone + Serialize + 'static>(tea_batch: Vec<Box<dyn Tea + Send>>, args: &Option<Box<dyn Argument + Send>>) -> Vec<Box<dyn Tea + Send>> {
     match args {
         None => panic!("Need to pass \"filepath\" params!"),
@@ -76,7 +75,16 @@ fn pour_to_csv<T: Tea + Send + Sync + Clone + Serialize + 'static>(tea_batch: Ve
             let box_args = box_args.as_any().downcast_ref::<PourCsvArg>().unwrap();
             // TODO: update to use from_writer and pass Writer with append and remove headers
             // (check existence first for headers)
-            let mut writer = csv::Writer::from_path(&box_args.filepath).unwrap();
+            //let headers: bool;
+            let headers = !Path::new(&box_args.filepath).exists();
+            let file = OpenOptions::new()
+                .write(true)
+                .append(true)
+                .create(true)
+                .open(&box_args.filepath)
+                .unwrap();
+
+            let mut writer = csv::WriterBuilder::new().has_headers(headers).from_writer(file);
 
             tea_batch.into_iter()
                 .map(|tea| {
@@ -93,13 +101,13 @@ fn pour_to_csv<T: Tea + Send + Sync + Clone + Serialize + 'static>(tea_batch: Ve
 
 #[cfg(test)]
 mod tests {
-    use super::{FillCsvArg, FillCsTea};
+    use super::{PourCsvArg, PourCsTea};
     use rettle::tea::Tea;
     use rettle::pot::Pot;
-    use serde::Deserialize;
+    use serde::Serialize;
     use std::any::Any;
 
-    #[derive(Default, Clone, Debug, Deserialize)]
+    #[derive(Default, Clone, Debug, Serialize)]
     struct TestCsTea {
         id: i32,
         name: String,
@@ -117,19 +125,18 @@ mod tests {
 
     #[test]
     fn create_csv_args() {
-        let csv_args = FillCsvArg::new("fixtures/test.csv", 50);
+        let csv_args = PourCsvArg::new("fixtures/test.csv");
         assert_eq!(csv_args.filepath, "fixtures/test.csv");
-        assert_eq!(csv_args.buffer_length, 50);
     }
 
     #[test]
-    fn create_fill_cstea() {
-        let csv_args = FillCsvArg::new("fixtures/test.csv", 50);
-        let fill_cstea = FillCsTea::new::<TestCsTea>("test_csv", "fixture", csv_args);
-        let mut new_pot = Pot::new();
-        new_pot.add_source(fill_cstea);
-        assert_eq!(new_pot.get_sources().len(), 1);
-        assert_eq!(new_pot.get_sources()[0].get_name(), "test_csv");
+    fn create_pour_cstea() {
+        let csv_args = PourCsvArg::new("fixtures/test.csv");
+        let pour_cstea = PourCsTea::new::<TestCsTea>("test_csv", csv_args);
+        let new_pot = Pot::new();
+        new_pot.add_ingredient(pour_cstea);
+        assert_eq!(new_pot.get_recipe().read().unwrap().len(), 1);
+        assert_eq!(new_pot.get_recipe().read().unwrap()[0].get_name(), "test_csv");
     }
 }
 
