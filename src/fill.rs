@@ -1,7 +1,3 @@
-extern crate rettle;
-extern crate csv;
-extern crate serde;
-
 use rettle::ingredient::{Ingredient, Argument, Fill};
 use rettle::brewer::{Brewery, make_tea};
 use rettle::tea::Tea;
