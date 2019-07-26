@@ -67,11 +67,10 @@ fn pour_to_csv<T: Tea + Send + Sync + Clone + Serialize + 'static>(tea_batch: Ve
     match args {
         None => panic!("Need to pass \"filepath\" params!"),
         Some(box_args) => {
-            // unwrap params
+            // Unwrap params.
             let box_args = box_args.as_any().downcast_ref::<PourCsvArg>().unwrap();
-            // TODO: update to use from_writer and pass Writer with append and remove headers
-            // (check existence first for headers)
-            //let headers: bool;
+
+            // Open csv file to write data to, panic if fail.
             let headers = !Path::new(&box_args.filepath).exists();
             let file = OpenOptions::new()
                 .write(true)
