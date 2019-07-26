@@ -9,7 +9,7 @@ This is a generic csv file Fill and Pour Ingredient crate for use with the `rett
 - PourCsTea: Wrapper to simplifiy the creation of the Pour Ingredient to be used in the rettle Pot.
 
 ## Example
-```rust
+```ignore
 fn main() {
     let test_csvarg = FillCsvArg::new("fixtures/test.csv", 50);
     let test_pour_csvarg = PourCsvArg::new("fixtures/pour.csv");
