@@ -90,20 +90,29 @@ fn fill_from_csv<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn
     where for<'de> T: Deserialize<'de>
 {
     match args {
-        None => panic!("Need to pass \"filepath\" and buffer_length params!"),
+        None => (),
         Some(box_args) => {
-            // unwrap params
+            // Unwrap params.
             let box_args = box_args.as_any().downcast_ref::<FillCsvArg>().unwrap();
             
-            // initialize reader with specified file from path
-            let f = File::open(&box_args.filepath).unwrap();
-            let reader = BufReader::new(f);
-            let mut rdr = csv::Reader::from_reader(reader);
+            // Initialize reader with specified file from path.
+            let f = File::open(&box_args.filepath);
+
+            let mut rdr = match f {
+                Ok(f) => {
+                    let reader = BufReader::new(f);
+                    csv::Reader::from_reader(reader)
+                },
+                Err(e) => {
+                    println!("Failed opening file! Error: {:?}", e);
+                    return
+                },
+            };
             
-            // iterate over csv lines and push data into processer
+            // Iterate over csv lines and push data into processer
             let mut tea_batch: Vec<Box<dyn Tea + Send>> = Vec::with_capacity(box_args.buffer_length);
             for result in rdr.deserialize() {
-                // check if batch size has been reached and send to brewers if so
+                // Check if batch size has been reached and send to brewers if so.
                 if tea_batch.len() == box_args.buffer_length {
                     let recipe = Arc::clone(&recipe);
                     call_brewery(brewery, recipe, tea_batch);
