@@ -21,7 +21,7 @@ fn main() {
 
     new_pot.add_source(fill_cstea);
 
-    // Steep operatoins of choice
+    // Steep operations of choice
 
     new_pot.add_ingredient(pour_cstea);
 
