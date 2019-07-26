@@ -1,7 +1,3 @@
-extern crate cstea;
-extern crate rettle;
-extern crate serde;
-
 use cstea::fill::{FillCsvArg, FillCsTea};
 use cstea::pour::{PourCsvArg, PourCsTea};
 use rettle::tea::Tea;
@@ -55,7 +51,8 @@ fn main() {
     new_pot.add_ingredient(Box::new(Steep{
         name: String::from("steep1"),
         computation: Box::new(|tea_batch, args| {
-            tea_batch.into_iter()
+            tea_batch
+                .into_iter()
                 .map(|tea| {
                     let mut tea = tea.as_any().downcast_ref::<CsTea>().unwrap().clone();
                     match args {
