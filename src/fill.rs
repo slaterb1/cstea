@@ -14,7 +14,7 @@ use std::fmt::Debug;
 pub struct FillCsvArg {
     /// The filepath to the csv that will be processed.
     filepath: String,
-    buffer_length: usize,
+    batch_size: usize,
 }
 
 impl FillCsvArg {
@@ -24,10 +24,10 @@ impl FillCsvArg {
     /// # Arguments
     ///
     /// * `filepath` - filepath for csv to load.
-    /// * `buffer_length` - number of csv lines to process at a time.
-    pub fn new(filepath: &str, buffer_length: usize) -> FillCsvArg {
+    /// * `batch_size` - number of csv lines to process at a time.
+    pub fn new(filepath: &str, batch_size: usize) -> FillCsvArg {
         let filepath = String::from(filepath);
-        FillCsvArg { filepath, buffer_length }
+        FillCsvArg { filepath, batch_size }
     }
 }
 
@@ -110,13 +110,13 @@ fn fill_from_csv<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn
             };
             
             // Iterate over csv lines and push data into processer
-            let mut tea_batch: Vec<Box<dyn Tea + Send>> = Vec::with_capacity(box_args.buffer_length);
+            let mut tea_batch: Vec<Box<dyn Tea + Send>> = Vec::with_capacity(box_args.batch_size);
             for result in rdr.deserialize() {
                 // Check if batch size has been reached and send to brewers if so.
-                if tea_batch.len() == box_args.buffer_length {
+                if tea_batch.len() == box_args.batch_size {
                     let recipe = Arc::clone(&recipe);
                     call_brewery(brewery, recipe, tea_batch);
-                    tea_batch = Vec::with_capacity(box_args.buffer_length);
+                    tea_batch = Vec::with_capacity(box_args.batch_size);
                 }
                 let tea: T = result.unwrap();
                 tea_batch.push(Box::new(tea));
@@ -155,7 +155,7 @@ mod tests {
     fn create_csv_args() {
         let csv_args = FillCsvArg::new("fixtures/test.csv", 50);
         assert_eq!(csv_args.filepath, "fixtures/test.csv");
-        assert_eq!(csv_args.buffer_length, 50);
+        assert_eq!(csv_args.batch_size, 50);
     }
 
     #[test]
