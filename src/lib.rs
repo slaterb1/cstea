@@ -10,6 +10,19 @@ This is a generic csv file Fill and Pour Ingredient crate for use with the `rett
 
 ## Example
 ```ignore
+#[derive(Default, Clone, Debug, Deserialize, Serialize)]
+struct CsTea {
+    id: i32,
+    name: String,
+    value: i32
+}
+
+impl Tea for CsTea {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
 fn main() {
     let test_csvarg = FillCsvArg::new("fixtures/test.csv", 50);
     let test_pour_csvarg = PourCsvArg::new("fixtures/pour.csv");
@@ -32,3 +45,6 @@ fn main() {
 
 pub mod fill;
 pub mod pour;
+
+pub use self::fill::{FillCsvArg, FillCsTea};
+pub use self::pour::{PourCsvArg, PourCsTea};
