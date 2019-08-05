@@ -1,9 +1,12 @@
 use cstea::fill::{FillCsvArg, FillCsTea};
 use cstea::pour::{PourCsvArg, PourCsTea};
-use rettle::tea::Tea;
-use rettle::brewery::Brewery;
-use rettle::pot::Pot;
-use rettle::ingredient::{Argument, Steep};
+use rettle::{
+    Tea,
+    Brewery,
+    Pot,
+    Argument,
+    Steep,
+};
 
 use std::any::Any;
 use std::time::Instant;

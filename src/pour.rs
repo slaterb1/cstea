@@ -1,5 +1,8 @@
-use rettle::ingredient::{ Argument, Pour};
-use rettle::tea::Tea;
+use rettle::{
+    Argument, 
+    Pour,
+    Tea,
+};
 
 use std::any::Any;
 use serde::Serialize;
@@ -97,8 +100,10 @@ fn pour_to_csv<T: Tea + Send + Sync + Clone + Serialize + 'static>(tea_batch: Ve
 #[cfg(test)]
 mod tests {
     use super::{PourCsvArg, PourCsTea};
-    use rettle::tea::Tea;
-    use rettle::pot::Pot;
+    use rettle::{
+        Tea,
+        Pot,
+    };
     use serde::Serialize;
     use std::any::Any;
 
