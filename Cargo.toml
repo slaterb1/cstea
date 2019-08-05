@@ -3,8 +3,13 @@ name = "cstea"
 version = "1.0.0"
 authors = ["Benjamin Slater <benjamin.ed.slater@gmail.com>"]
 edition = "2018"
+readme = "README.md"
+documentation = "https://docs.rs/cstea"
+repository = "https://github.com/slaterb1/cstea"
+description = "An Ingredient crate for working with csv files in rettle."
+license = "MIT OR Apache-2.0"
 
 [dependencies]
-rettle = { git = "ssh://git@github.com/slaterb1/rettle" }
+rettle = "1"
 csv = "1"
 serde = { version = "1.0", features = ["derive"] }
