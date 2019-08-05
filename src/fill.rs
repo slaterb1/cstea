@@ -1,5 +1,5 @@
 use rettle::ingredient::{Ingredient, Argument, Fill};
-use rettle::brewer::{Brewery, make_tea};
+use rettle::brewery::{Brewery, make_tea};
 use rettle::tea::Tea;
 
 use std::sync::{Arc, RwLock};

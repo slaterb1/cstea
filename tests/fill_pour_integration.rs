@@ -5,7 +5,7 @@ extern crate serde;
 use cstea::fill::{FillCsvArg, FillCsTea};
 use cstea::pour::{PourCsvArg, PourCsTea};
 use rettle::tea::Tea;
-use rettle::brewer::Brewery;
+use rettle::brewery::Brewery;
 use rettle::pot::Pot;
 
 use std::any::Any;
