@@ -1,4 +1,11 @@
 # cstea
+
+[![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Build Status](https://travis-ci.com/slaterb1/cstea.svg?branch=master)](https://travis-ci.com/slaterb1/cstea)
+[![Crates.io Version](https://img.shields.io/crates/v/cstea.svg)](https://crates.io/crates/cstea)
+[![Minimum rustc version](https://img.shields.io/badge/rustc-1.35.0+-lightgray.svg)](#rust-version-requirements)
+
 This is a generic csv file Fill and Pour Ingredient crate for use with the `rettle` ETL.
 
 ## Data Structures
