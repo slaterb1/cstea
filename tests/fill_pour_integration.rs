@@ -4,12 +4,9 @@ extern crate serde;
 
 use cstea::fill::{FillCsvArg, FillCsTea};
 use cstea::pour::{PourCsvArg, PourCsTea};
-use rettle::tea::Tea;
 use rettle::brewery::Brewery;
 use rettle::pot::Pot;
 
-use std::any::Any;
-use std::time::Instant;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::thread;
@@ -24,12 +21,6 @@ struct CsTea {
     value: i32
 }
 
-impl Tea for CsTea {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-}
-
 #[test]
 fn test_fill_pour() {
     if Path::new("fixtures/test.csv").exists() {
@@ -39,13 +30,14 @@ fn test_fill_pour() {
     let test_fill_csvarg = FillCsvArg::new("fixtures/fill.csv", 50);
     let test_pour_csvarg = PourCsvArg::new("fixtures/test.csv");
 
-    let brewery = Brewery::new(4, Instant::now());
-    let mut new_pot = Pot::new();
+    let brewery = Brewery::new(4);
     let fill_cstea = FillCsTea::new::<CsTea>("csv_tea_source", "csv_fixture", test_fill_csvarg);
     let pour_cstea = PourCsTea::new::<CsTea>("csv_pour_test", test_pour_csvarg);
 
-    new_pot.add_source(fill_cstea);
-    new_pot.add_ingredient(pour_cstea);
+    let new_pot = Pot::new()
+        .add_source(fill_cstea)
+        .add_ingredient(pour_cstea);
+
     new_pot.brew(&brewery);
 
     thread::sleep(Duration::from_millis(400));

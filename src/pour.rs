@@ -1,7 +1,6 @@
 use rettle::{
     Argument, 
     Pour,
-    Tea,
 };
 
 use std::any::Any;
@@ -47,7 +46,7 @@ impl PourCsTea {
     ///
     /// * `name` - Ingredient name
     /// * `params` - Params data structure holding the `filepath` for the csv to process
-    pub fn new<T: Tea + Send + Sync + Clone + Serialize + 'static>(name: &str, params: PourCsvArg) -> Box<Pour> {
+    pub fn new<T: Send + Sync + Clone + Serialize + 'static>(name: &str, params: PourCsvArg) -> Box<Pour<T>> {
         Box::new(Pour {
             name: String::from(name),
             computation: Box::new(|tea_batch, args| {
@@ -66,7 +65,7 @@ impl PourCsTea {
 ///
 /// * `tea_batch` - Vec<Box<dyn Tea + Send>> batch that needs to be output to csv
 /// * `args` - Params specifying the filepath of the csv.
-fn pour_to_csv<T: Tea + Send + Sync + Clone + Serialize + 'static>(tea_batch: Vec<Box<dyn Tea + Send>>, args: &Option<Box<dyn Argument + Send>>) -> Vec<Box<dyn Tea + Send>> {
+fn pour_to_csv<T: Send + Sync + Clone + Serialize + 'static>(tea_batch: Vec<T>, args: &Option<Box<dyn Argument + Send>>) -> Vec<T> {
     match args {
         None => panic!("Need to pass \"filepath\" params!"),
         Some(box_args) => {
@@ -86,11 +85,8 @@ fn pour_to_csv<T: Tea + Send + Sync + Clone + Serialize + 'static>(tea_batch: Ve
 
             tea_batch.into_iter()
                 .map(|tea| {
-                    let tea = tea.as_any().downcast_ref::<T>().unwrap();
-                    let same_tea = tea.clone();
-                    writer.serialize(&same_tea).unwrap();
-
-                    Box::new(same_tea) as Box<dyn Tea + Send>
+                    writer.serialize(&tea).unwrap();
+                    tea
                 })
                 .collect()
         }
@@ -100,24 +96,14 @@ fn pour_to_csv<T: Tea + Send + Sync + Clone + Serialize + 'static>(tea_batch: Ve
 #[cfg(test)]
 mod tests {
     use super::{PourCsvArg, PourCsTea};
-    use rettle::{
-        Tea,
-        Pot,
-    };
+    use rettle::Pot;
     use serde::Serialize;
-    use std::any::Any;
 
     #[derive(Default, Clone, Debug, Serialize)]
     struct TestCsTea {
         id: i32,
         name: String,
         value: i32
-    }
-
-    impl Tea for TestCsTea {
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
     }
 
     #[test]
@@ -130,8 +116,8 @@ mod tests {
     fn create_pour_cstea() {
         let csv_args = PourCsvArg::new("fixtures/test.csv");
         let pour_cstea = PourCsTea::new::<TestCsTea>("test_csv", csv_args);
-        let new_pot = Pot::new();
-        new_pot.add_ingredient(pour_cstea);
+        let new_pot = Pot::new()
+            .add_ingredient(pour_cstea);
         assert_eq!(new_pot.get_recipe().read().unwrap().len(), 1);
         assert_eq!(new_pot.get_recipe().read().unwrap()[0].get_name(), "test_csv");
     }
