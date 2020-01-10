@@ -8,7 +8,6 @@ use rettle::{
 };
 
 use std::any::Any;
-use std::time::Instant;
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]

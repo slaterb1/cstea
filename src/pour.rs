@@ -96,24 +96,14 @@ fn pour_to_csv<T: Send + Sync + Clone + Serialize + 'static>(tea_batch: Vec<T>, 
 #[cfg(test)]
 mod tests {
     use super::{PourCsvArg, PourCsTea};
-    use rettle::{
-        Tea,
-        Pot,
-    };
+    use rettle::Pot;
     use serde::Serialize;
-    use std::any::Any;
 
     #[derive(Default, Clone, Debug, Serialize)]
     struct TestCsTea {
         id: i32,
         name: String,
         value: i32
-    }
-
-    impl Tea for TestCsTea {
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
     }
 
     #[test]
@@ -126,8 +116,8 @@ mod tests {
     fn create_pour_cstea() {
         let csv_args = PourCsvArg::new("fixtures/test.csv");
         let pour_cstea = PourCsTea::new::<TestCsTea>("test_csv", csv_args);
-        let new_pot = Pot::new();
-        new_pot.add_ingredient(pour_cstea);
+        let new_pot = Pot::new()
+            .add_ingredient(pour_cstea);
         assert_eq!(new_pot.get_recipe().read().unwrap().len(), 1);
         assert_eq!(new_pot.get_recipe().read().unwrap()[0].get_name(), "test_csv");
     }

@@ -134,24 +134,14 @@ fn fill_from_csv<T: Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn Argum
 #[cfg(test)]
 mod tests {
     use super::{FillCsvArg, FillCsTea};
-    use rettle::{
-        Tea,
-        Pot,
-    };
+    use rettle::Pot;
     use serde::Deserialize;
-    use std::any::Any;
 
     #[derive(Default, Clone, Debug, Deserialize)]
     struct TestCsTea {
         id: i32,
         name: String,
         value: i32
-    }
-
-    impl Tea for TestCsTea {
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
     }
 
     #[test]
@@ -165,8 +155,8 @@ mod tests {
     fn create_fill_cstea() {
         let csv_args = FillCsvArg::new("fixtures/test.csv", 50);
         let fill_cstea = FillCsTea::new::<TestCsTea>("test_csv", "fixture", csv_args);
-        let mut new_pot = Pot::new();
-        new_pot.add_source(fill_cstea);
+        let new_pot = Pot::new()
+            .add_source(fill_cstea);
         assert_eq!(new_pot.get_sources().len(), 1);
         assert_eq!(new_pot.get_sources()[0].get_name(), "test_csv");
     }
