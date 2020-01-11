@@ -38,11 +38,11 @@ fn main() {
     let fill_cstea = FillCsTea::new::<CsTea>("csv_tea_source", "csv_fixture", test_csvarg);
     let pour_cstea = PourCsTea::new::<CsTea>("csv_pour_test", test_pour_csvarg);
 
-    new_pot.add_source(fill_cstea);
+    new_pot = new_pot.add_source(fill_cstea);
 
     // Steep operations of choice
 
-    new_pot.add_ingredient(pour_cstea);
+    new_pot = new_pot.add_ingredient(pour_cstea);
 
     new_pot.brew(&brewery);
 }
